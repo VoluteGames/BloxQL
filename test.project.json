@@ -1,0 +1,12 @@
+{
+  "name": "BloxQL-Test",
+  "tree": {
+    "$className": "DataModel",
+    "ServerScriptService": {
+      "$className": "ServerScriptService",
+      "BloxQL": {
+        "$path": "lib"
+      }
+    }
+  }
+}
