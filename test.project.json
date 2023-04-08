@@ -6,6 +6,9 @@
       "$className": "ServerScriptService",
       "BloxQL": {
         "$path": "lib"
+      },
+      "Test": {
+        "$path": "example"
       }
     }
   }

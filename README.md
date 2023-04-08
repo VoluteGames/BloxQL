@@ -22,16 +22,10 @@ Go to the project directory
   cd BloxQL
 ```
 
-Install Rojo
+Install Rojo & Wally
 
 ```bash
   aftman install
-```
-
-Install Wally
-
-```bash
-  foreman install
 ```
 
 Install Dependencies
@@ -51,4 +45,4 @@ BloxQL should now be in your ServerScriptService
 
 ## License
 
-[GPLv3](https://choosealicense.com/licenses/mit/)
+[GPLv3](./README.md)

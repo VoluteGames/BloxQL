@@ -1,7 +1,5 @@
-local Exports = {}
+local Sift = require(script.Parent.Packages.sift)
 
-for name, driver in pairs(script:GetChildren()) do
-  Exports[name] = require(driver)
-end
-
-return Exports
+return Sift.Dictionary.map(script:GetChildren(), function(driver)
+	return require(driver), driver.Name
+end)
