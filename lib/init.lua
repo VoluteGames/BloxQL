@@ -20,7 +20,7 @@ function BloxQL.new(config: Types.Config)
 	end
 
 	self.driver = config.driver or BloxQL.Drivers.Default
-	self.driver = self.driver.new(self)
+	self.driver = self.driver.new(self, config.driverConfig or {})
 
 	setmetatable(self, BloxQL)
 	return self
