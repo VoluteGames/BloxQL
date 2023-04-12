@@ -106,20 +106,37 @@ function BatchedQueueDriver.new(
 					if not request.Body then
 						return attemptRetry(`No body in response ({request.StatusCode} {request.StatusMessage})`)
 					end
-					if request.StatusCode >= 400 then
-						return attemptRetry(`Request failed ({request.StatusCode} {request.StatusMessage})`)
-					end
 
 					local decodeSuccess, decodedBody = pcall(HttpService.JSONDecode, HttpService, request.Body)
-					if not decodeSuccess then
+					if not decodeSuccess and request.StatusCode < 400 then
 						return attemptRetry(`Could not decode response body: {decodedBody}`)
+					end
+
+					if request.StatusCode >= 400 then
+						local errorMessage = ""
+
+						if decodedBody and decodedBody.errors then
+							errorMessage = "\n"
+								.. table.concat(
+									Sift.Array.map(decodedBody.errors, function(error)
+										return error.message
+									end),
+									"\n"
+								)
+						end
+
+						return attemptRetry(
+							`Request failed ({request.StatusCode} {request.StatusMessage}){errorMessage}`
+						)
 					end
 
 					for index, response in ipairs(decodedBody) do
 						local item = requestItems[index]
 
 						if item then
-							self.defaultDriver:readResponse(response):andThen(item.resolve, item.reject)
+							self.defaultDriver
+								:readResponse(response, item.driverOptions.parse)
+								:andThen(item.resolve, item.reject)
 						end
 					end
 				end
@@ -133,13 +150,18 @@ function BatchedQueueDriver.new(
 	return self
 end
 
-function BatchedQueueDriver:addRequest(options: Types.GQLRequestBody, headers: { [string]: string })
+function BatchedQueueDriver:addRequest(
+	options: Types.GQLRequestBody,
+	headers: { [string]: string },
+	driverOptions: table
+)
 	return Promise.new(function(resolve, reject)
 		table.insert(self.queue, {
 			options = options,
 			headers = headers,
 			resolve = resolve,
 			reject = reject,
+			driverOptions = driverOptions,
 		})
 	end)
 end

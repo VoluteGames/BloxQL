@@ -21,9 +21,14 @@ function DefaultDriver.new(super, config: { requestAsync: (Types.RequestAsyncOpt
 	return self
 end
 
-function DefaultDriver:addRequest(options: Types.GQLRequestBody, headers: { [string]: string }, currentRetry: number?)
+function DefaultDriver:addRequest(
+	options: Types.GQLRequestBody,
+	headers: { [string]: string },
+	driverOptions: table,
+	currentRetry: number?
+)
 	return Promise.new(function(resolve, reject)
-		self:makeRequest(options, headers, resolve, reject, currentRetry)
+		self:makeRequest(options, headers, resolve, reject, driverOptions, currentRetry)
 	end)
 end
 
@@ -32,6 +37,7 @@ function DefaultDriver:makeRequest(
 	headers: { [string]: string },
 	resolve: (table) -> nil,
 	reject: (table, { string }?) -> nil,
+	driverOptions: table,
 	currentRetry: number?
 )
 	local encodeSuccess, encodedBody = pcall(HttpService.JSONEncode, HttpService, options)
@@ -51,7 +57,7 @@ function DefaultDriver:makeRequest(
 		currentRetry += 1
 
 		if currentRetry <= self.maxRetries then
-			return self:makeRequest(options, headers, currentRetry)
+			return self:makeRequest(options, headers, resolve, reject, driverOptions, currentRetry)
 		else
 			return reject({}, errorMessage)
 		end
@@ -61,45 +67,61 @@ function DefaultDriver:makeRequest(
 		return resolve(attemptRetry(request))
 	end
 	if not request.Body then
-		return resolve(attemptRetry(`No body in response ({request.StatusCode} {request.StatusMessage})`))
-	end
-	if request.StatusCode >= 400 then
-		return attemptRetry(`Request failed ({request.StatusCode} {request.StatusMessage})`)
+		return attemptRetry(`No body in response ({request.StatusCode} {request.StatusMessage})`)
 	end
 
 	local decodeSuccess, decodedBody = pcall(HttpService.JSONDecode, HttpService, request.Body)
-	if not decodeSuccess then
+	if not decodeSuccess and request.StatusCode < 400 then
 		return attemptRetry(`Could not decode response body: {decodedBody}`)
 	end
 
-	return self:readResponse(decodedBody):andThen(resolve, reject)
+	if request.StatusCode >= 400 then
+		local errorMessage = ""
+
+		if decodedBody and decodedBody.errors then
+			errorMessage = "\n"
+				.. table.concat(
+					Sift.Array.map(decodedBody.errors, function(error)
+						return error.message
+					end),
+					"\n"
+				)
+		end
+
+		return attemptRetry(`Request failed ({request.StatusCode} {request.StatusMessage}){errorMessage}`)
+	end
+
+	return self:readResponse(decodedBody, driverOptions.parse):andThen(resolve, reject)
 end
 
-function DefaultDriver:readResponse(body: {
-	data: table?,
-	errors: {
-		[number]: {
-			message: string,
-			locations: {
-				[number]: {
-					line: number,
-					column: number,
+function DefaultDriver:readResponse(
+	body: {
+		data: table?,
+		errors: {
+			[number]: {
+				message: string,
+				locations: {
+					[number]: {
+						line: number,
+						column: number,
+					},
 				},
-			},
-			path: {
-				[number]: string,
-			},
-			extensions: {
-				[number]: {
-					code: string,
-					stacktrace: {
-						[number]: string,
+				path: {
+					[number]: string,
+				},
+				extensions: {
+					[number]: {
+						code: string,
+						stacktrace: {
+							[number]: string,
+						},
 					},
 				},
 			},
-		},
-	}?,
-})
+		}?,
+	},
+	parse: ((table) -> any)?
+)
 	return Promise.new(function(resolve, reject)
 		if body.errors then
 			return reject(
@@ -125,7 +147,9 @@ function DefaultDriver:readResponse(body: {
 			)
 		end
 
-		return resolve(body.data or {})
+		local bodyData = body.data or {}
+
+		return resolve(parse and parse(bodyData) or bodyData)
 	end)
 end
 
