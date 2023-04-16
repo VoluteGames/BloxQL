@@ -135,7 +135,7 @@ function BatchedQueueDriver.new(
 
 						if item then
 							self.defaultDriver
-								:readResponse(response, item.driverOptions.parse)
+								:readResponse(response, item.driverOptions.parse, item.driverOptions.rawErrors)
 								:andThen(item.resolve, item.reject)
 						end
 					end

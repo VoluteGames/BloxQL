@@ -91,7 +91,7 @@ function DefaultDriver:makeRequest(
 		return attemptRetry(`Request failed ({request.StatusCode} {request.StatusMessage}){errorMessage}`)
 	end
 
-	return self:readResponse(decodedBody, driverOptions.parse):andThen(resolve, reject)
+	return self:readResponse(decodedBody, driverOptions.parse, driverOptions.rawErrors):andThen(resolve, reject)
 end
 
 function DefaultDriver:readResponse(
@@ -120,7 +120,8 @@ function DefaultDriver:readResponse(
 			},
 		}?,
 	},
-	parse: ((table) -> any)?
+	parse: ((table) -> any)?,
+  rawErrors: boolean
 )
 	return Promise.new(function(resolve, reject)
 		if body.errors then
@@ -130,7 +131,7 @@ function DefaultDriver:readResponse(
 					Sift.Array.map(body.errors, function(err)
 						local errMessage = err.message
 
-						if err.locations then
+						if err.locations and not rawErrors then
 							errMessage = errMessage .. " ("
 
 							for _, location in pairs(err.locations) do
