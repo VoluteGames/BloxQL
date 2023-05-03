@@ -3,51 +3,15 @@
 
 A GraphQL client for Roblox
 
-## Install with wally
+## Install
+### With wally
 ```toml
 [dependencies]
 BloxQL = "ulferno/bloxql@0.0.2"
 ```
 
-
-## Dependencies
-
-- [Rojo](https://github.com/rojo-rbx/rojo) (Through [Aftman](https://github.com/LPGhatguy/aftman))
-- [Wally](https://github.com/UpliftGames/wally) (Through [Foreman](https://github.com/Roblox/foreman))
-## Run Locally
-
-Clone the project
-
-```bash
-  git clone https://github.com/BritSovUK/BloxQL.git
-```
-
-Go to the project directory
-
-```bash
-  cd BloxQL
-```
-
-Install Rojo & Wally
-
-```bash
-  aftman install
-```
-
-Install Dependencies
-
-```bash
-  wally install
-```
-
-Run the example
-
-```bash
-  rojo serve test.project.json
-```
-
-BloxQL should now be in your ServerScriptService
-
+### GitHub releases
+[Latest release](https://github.com/BritSovInteractive/BloxQL/releases)
 
 ## License
 

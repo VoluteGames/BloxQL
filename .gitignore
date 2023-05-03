@@ -5,9 +5,6 @@
 /*.rbxlx.lock
 /*.rbxl.lock
 
-# Wally
-lib/Packages
-
 # private example
 ukexample
 ukexample/*
