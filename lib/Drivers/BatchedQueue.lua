@@ -1,6 +1,6 @@
 local HttpService = game:GetService("HttpService")
 
-local Packages = script.Parent.Parent.Parent
+local Packages = script.Parent.Parent.Packages
 local Sift = require(Packages.sift)
 local Promise = require(Packages.promise)
 
