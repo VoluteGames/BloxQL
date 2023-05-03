@@ -3,6 +3,12 @@
 
 A GraphQL client for Roblox
 
+## Install with wally
+```toml
+[dependencies]
+BloxQL = "ulferno/bloxql@0.0.1"
+```
+
 
 ## Dependencies
 
