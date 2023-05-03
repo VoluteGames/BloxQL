@@ -13,7 +13,7 @@ function Document.new(super, query: string, parse: ((table) -> any)?)
 	return self
 end
 
-function Document:__call(options, raw: boolean?)
+function Document:__call(options, rawResponse: boolean?, rawErrors: boolean?)
 	local super = self.super
 	local headers = typeof(super.headers) == "function" and super.headers(super) or super.headers
 	local driverOptions = options.driverOptions or {}
@@ -21,7 +21,7 @@ function Document:__call(options, raw: boolean?)
 	return self.super.driver:addRequest(
 		{ variables = options.variables or {}, query = self.query },
 		Sift.Dictionary.merge(headers, options.headers),
-		raw and driverOptions or Sift.Dictionary.merge(driverOptions, { parse = self.parse })
+		Sift.Dictionary.merge(driverOptions, { parse = not rawResponse and self.parse or nil, rawErrors = rawErrors or false })
 	)
 end
 
