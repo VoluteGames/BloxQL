@@ -15,4 +15,4 @@ BloxQL = "ulferno/bloxql@0.0.4"
 
 ## License
 
-[GPLv3](./README.md)
+[LGPLv3](./README.md)
