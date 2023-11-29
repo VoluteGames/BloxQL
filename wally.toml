@@ -2,7 +2,7 @@
 name = "ulferno/bloxql"
 description = "A GraphQL client for Roblox"
 version = "0.0.5"
-license = "GPLv3"
+license = "lgpl-3.0"
 author = "ulferno, goldyydev"
 registry = "https://github.com/upliftgames/wally-index"
 repo = "https://github.com/BritSovInteractive/BloxQL"
