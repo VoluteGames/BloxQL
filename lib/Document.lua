@@ -19,9 +19,12 @@ function Document:__call(options, rawResponse: boolean?, rawErrors: boolean?)
 	local driverOptions = options.driverOptions or {}
 
 	return self.super.driver:addRequest(
-		{ variables = options.variables or {}, query = self.query },
+		{ variables = options.variables, query = self.query },
 		Sift.Dictionary.merge(headers, options.headers),
-		Sift.Dictionary.merge(driverOptions, { parse = not rawResponse and self.parse or nil, rawErrors = rawErrors or false })
+		Sift.Dictionary.merge(
+			driverOptions,
+			{ parse = not rawResponse and self.parse or nil, rawErrors = rawErrors or false }
+		)
 	)
 end
 
