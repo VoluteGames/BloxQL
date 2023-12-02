@@ -27,11 +27,13 @@ function BatchedQueueDriver.new(
 	self.maxRequestSize = config.maxRequestSize or 95000 -- in bytes, default is just below 100kb, the default max for express
 	self.maxRetries = config.maxRetries or 0
 	self.queue = {}
+	self.processing = false
 
 	task.spawn(function()
 		while task.wait(self.interval) do
 			if #self.queue > 0 then
 				local queuedItems = self.queue
+				self.processing = true
 				self.queue = {}
 
 				-- Remove queries in excess of the max request size
@@ -142,8 +144,16 @@ function BatchedQueueDriver.new(
 				end
 
 				makeRequest()
+
+				self.processing = false
 			end
 		end
+	end)
+
+	game:BindToClose(function()
+		repeat
+			task.wait()
+		until #self.queue == 0 and not self.processing
 	end)
 
 	setmetatable(self, BatchedQueueDriver)
