@@ -117,14 +117,20 @@ function BatchedQueueDriver.new(
 					if request.StatusCode >= 400 then
 						local errorMessage = ""
 
-						if decodedBody and decodedBody.errors then
-							errorMessage = "\n"
-								.. table.concat(
-									Sift.Array.map(decodedBody.errors, function(error)
-										return error.message
-									end),
-									"\n"
-								)
+						-- TODO: don't fail whole request if "errors" is present per item, only the items which actually errored
+
+						if decodedBody then
+							for _, response in ipairs(decodedBody) do
+								if response.errors then
+									errorMessage = "\n"
+										.. table.concat(
+											Sift.Array.map(response.errors, function(error)
+												return error.message
+											end),
+											"\n"
+										)
+								end
+							end
 						end
 
 						return attemptRetry(
