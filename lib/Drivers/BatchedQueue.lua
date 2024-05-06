@@ -120,16 +120,20 @@ function BatchedQueueDriver.new(
 						-- TODO: don't fail whole request if "errors" is present per item, only the items which actually errored
 
 						if decodedBody then
-							for _, response in ipairs(decodedBody) do
-								if response.errors then
-									errorMessage = "\n"
-										.. table.concat(
-											Sift.Array.map(response.errors, function(error)
-												return error.message
-											end),
-											"\n"
-										)
+							if typeof(decodedBody) == "table" then
+								for _, response in pairs(decodedBody) do
+									if response.errors then
+										errorMessage = "\n"
+											.. table.concat(
+												Sift.Array.map(response.errors, function(error)
+													return error.message
+												end),
+												"\n"
+											)
+									end
 								end
+							elseif typeof(decodedBody) == "string" then
+								errorMessage = "\n" .. decodedBody
 							end
 						end
 
